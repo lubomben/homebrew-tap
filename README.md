@@ -16,3 +16,8 @@ brew "<cask>"
 ## Documentation
 
 `brew help`, `man brew` or check [Homebrew's documentation](https://docs.brew.sh).
+
+## Casks
+# ProToys - Collection of professional tools and utilities
+# Metalterm - GPU-accelerated terminal emulator
+# Stapl - Utility and productivity tool
