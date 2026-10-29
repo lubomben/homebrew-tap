@@ -19,5 +19,8 @@ brew "<cask>"
 
 ## Casks
 ### ProToys - Collection of professional tools and utilities
+https://protoys.app/
 ### Metalterm - GPU-accelerated terminal emulator
+https://metalterm.dev/
 ### Stapl - Utility and productivity tool
+https://twoplus11.com/stapl/
