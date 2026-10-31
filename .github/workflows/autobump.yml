@@ -2,13 +2,15 @@ name: Auto-bump Casks
 
 on:
   schedule:
-    # Esecuzione automatica ogni notte alle 03:00 UTC
+    # Esecuzione programmata ogni notte alle 03:00 UTC
     - cron: '0 3 * * *'
-  workflow_dispatch: # Permette l'avvio manuale da GitHub Actions
+  workflow_dispatch: # Avvio manuale da GitHub Actions
 
 jobs:
   autobump:
     runs-on: macos-latest
+    env:
+      ACTIONS_RUNNER_FORCE_ACTIONS_NODE_VERSION: "node24"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -26,7 +28,6 @@ jobs:
             cask_name=$(basename "$cask_file" .rb)
             echo "::group::Controllo $cask_name"
 
-            # Interroga livecheck in JSON
             json_data=$(brew livecheck --cask --json "lubomben/tap/$cask_name" 2>/dev/null || true)
             latest_ver=$(echo "$json_data" | jq -r '.[0].version.latest // empty' 2>/dev/null || true)
             current_ver=$(echo "$json_data" | jq -r '.[0].version.current // empty' 2>/dev/null || true)
@@ -44,14 +45,31 @@ jobs:
             echo "::endgroup::"
           done
 
-      - name: Commit and Push changes
+      - name: Commit, Push and Notify
+        env:
+          PUSHOVER_USER: ${{ secrets.PUSHOVER_USER_KEY }}
+          PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_API_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
           if [[ -n $(git status --porcelain) ]]; then
+            BUMPED=$(git status --porcelain Casks/ | awk '{print $2}' | xargs -n1 basename .rb | paste -sd ", " -)
+            echo "Cask aggiornati: $BUMPED"
+
             git add Casks/
-            git commit -m "chore(casks): automated version bump"
+            git commit -m "chore(casks): automated version bump [$BUMPED]"
             git push origin main
+
+            # Notifica push solo se i secret sono valorizzati
+            if [[ -n "$PUSHOVER_TOKEN" && -n "$PUSHOVER_USER" ]]; then
+              curl -s \
+                --form-string "token=$PUSHOVER_TOKEN" \
+                --form-string "user=$PUSHOVER_USER" \
+                --form-string "title=Homebrew Tap: Update Rilevato" \
+                --form-string "message=Nuova versione disponibile e recepita nel tap per: $BUMPED" \
+                https://api.pushover.net/1/messages.json > /dev/null
+            fi
           else
             echo "Nessun aggiornamento disponibile: tutti i Cask sono allineati."
           fi
