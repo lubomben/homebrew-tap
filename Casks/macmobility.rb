@@ -1,5 +1,5 @@
 cask "macmobility" do
-  version "1.0.50"
+  version "1.0.55"
   sha256 :no_check
 
   url "https://coderblocks.eu/downloads/MacMobilityMacOS.zip"
