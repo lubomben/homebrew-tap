@@ -2,9 +2,9 @@ name: Auto-bump Casks
 
 on:
   schedule:
-    # Esecuzione automatica ogni notte alle 03:00 UTC
+    # Esecuzione programmata ogni notte alle 03:00 UTC
     - cron: '0 3 * * *'
-  workflow_dispatch: # Permette l'avvio manuale dalla UI di GitHub
+  workflow_dispatch: # Permette l'avvio manuale da GitHub Actions
 
 jobs:
   autobump:
@@ -22,8 +22,12 @@ jobs:
         env:
           HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Scansiona e aggiorna i cask del tap se livecheck rileva una nuova versione
-          brew bump --tap=lubomben/homebrew-tap --write-only || true
+          for cask_file in Casks/*.rb; do
+            cask_name=$(basename "$cask_file" .rb)
+            echo "::group::Controllo $cask_name"
+            brew bump-cask-pr --write-only "lubomben/tap/$cask_name" || true
+            echo "::endgroup::"
+          done
 
       - name: Commit and Push changes
         run: |
@@ -34,5 +38,5 @@ jobs:
             git commit -m "chore(casks): automated version bump"
             git push origin main
           else
-            echo "Nessun aggiornamento disponibile."
+            echo "Nessun aggiornamento disponibile: tutti i Cask sono allineati."
           fi
