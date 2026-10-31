@@ -2,7 +2,7 @@ name: Auto-bump Casks
 
 on:
   schedule:
-    # Esecuzione programmata ogni notte alle 03:00 UTC
+    # Esecuzione automatica ogni notte alle 03:00 UTC
     - cron: '0 3 * * *'
   workflow_dispatch: # Permette l'avvio manuale da GitHub Actions
 
@@ -25,7 +25,22 @@ jobs:
           for cask_file in Casks/*.rb; do
             cask_name=$(basename "$cask_file" .rb)
             echo "::group::Controllo $cask_name"
-            brew bump-cask-pr --write-only "lubomben/tap/$cask_name" || true
+
+            # Interroga livecheck in JSON
+            json_data=$(brew livecheck --cask --json "lubomben/tap/$cask_name" 2>/dev/null || true)
+            latest_ver=$(echo "$json_data" | jq -r '.[0].version.latest // empty' 2>/dev/null || true)
+            current_ver=$(echo "$json_data" | jq -r '.[0].version.current // empty' 2>/dev/null || true)
+            is_outdated=$(echo "$json_data" | jq -r '.[0].version.outdated // false' 2>/dev/null || true)
+
+            echo "Cask: $cask_name | Attuale: $current_ver | Upstream: $latest_ver"
+
+            if [ "$is_outdated" = "true" ] && [ -n "$latest_ver" ] && [ "$latest_ver" != "null" ]; then
+              echo "-> Nuova versione disponibile ($latest_ver). Eseguo bump..."
+              brew bump-cask-pr --write-only --version="$latest_ver" "lubomben/tap/$cask_name" || true
+            else
+              echo "-> Nessun aggiornamento necessario (già allineato)."
+            fi
+
             echo "::endgroup::"
           done
 
