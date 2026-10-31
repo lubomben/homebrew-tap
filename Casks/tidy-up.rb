@@ -13,6 +13,8 @@ cask "tidy-up" do
   end
 
 
+  auto_updates true
+
   app "Tidy Up.app"
 
   zap trash: [
