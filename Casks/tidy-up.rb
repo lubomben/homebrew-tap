@@ -1,6 +1,6 @@
 cask "tidy-up" do
   version "6.0.10,79"
-  sha256 "61868b250acdc752c49d5d86569ff78ab8925997e0c41b9c4cdc4ba4e7ed7651"
+  sha256 :no_check
 
   url "https://www.hyperbolicsoftware.com/programs/TidyUp6Up.zip"
   name "Tidy Up"
@@ -11,7 +11,6 @@ cask "tidy-up" do
     url "https://www.hyperbolicsoftware.com/Receipts/Tidy_Up/TidyUp6Update.xml"
     strategy :sparkle
   end
-
 
   auto_updates true
 
