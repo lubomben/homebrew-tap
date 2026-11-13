@@ -6,6 +6,9 @@ on:
     - cron: '0 3 * * *'
   workflow_dispatch: # Avvio manuale da GitHub Actions
 
+permissions:
+  contents: write
+
 jobs:
   autobump:
     runs-on: macos-latest
@@ -47,19 +50,21 @@ jobs:
 
       - name: Commit, Push and Notify
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PUSHOVER_USER: ${{ secrets.PUSHOVER_USER_KEY }}
           PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_API_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          if [[ -n $(git status --porcelain) ]]; then
-            BUMPED=$(git status --porcelain Casks/ | awk '{print $2}' | xargs -n1 basename .rb | paste -sd ", " -)
+          BUMPED=$(git status --porcelain Casks/ | awk '{print $2}' | sed -E 's|^Casks/||; s|\.rb$||' | paste -sd ", " -)
+
+          if [[ -n "$BUMPED" ]]; then
             echo "Cask aggiornati: $BUMPED"
 
             git add Casks/
             git commit -m "chore(casks): automated version bump [$BUMPED]"
-            git push origin main
+            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
 
             # Notifica push solo se i secret sono valorizzati
             if [[ -n "$PUSHOVER_TOKEN" && -n "$PUSHOVER_USER" ]]; then
