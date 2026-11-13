@@ -1,6 +1,6 @@
 cask "macaroom" do
-  version "1.2.3,17"
-  sha256 "5ca6a72d85c34f54e8272de07a9c1da6893db9dbcb216febee169e8bc016f6ad"
+  version "1.2.4,18"
+  sha256 "904849eafd733bbdf5021549255dbc27752f65d234e2ba08a82b20009435982e"
 
   url "https://getmacaroom.com/updates/Macaroom-#{version.csv.first}.zip"
   name "Macaroom"
@@ -13,6 +13,7 @@ cask "macaroom" do
   end
 
   auto_updates true
+  depends_on macos: :sonoma
 
   app "Macaroom.app"
 
