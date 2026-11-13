@@ -1,1 +1,31 @@
+# macOS system files
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems
+
+# Homebrew / Ruby / Linter caches & local test artifacts
+.bundle/
+vendor/bundle/
+.rubocop_cache/
+*.bottle.*
+*.tar.gz
+*.dmg
+*.zip
+*.pkg
+
+# Editors & IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Local environment & logs
+.env
+.env.*
+*.log
